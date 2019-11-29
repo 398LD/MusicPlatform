@@ -1,0 +1,43 @@
+savaData: false
+server:
+  port: 8090
+spring:
+  datasource:
+    ###数据源基本配置
+    username: root
+    password: kexunsoftware101
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/centMusic?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    type: com.alibaba.druid.pool.DruidDataSource
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+  ####redis
+  redis:
+    database: 0
+    host: 127.0.0.1
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0
+    password: 123456
+    port: 6379
+    timeout: 500ms
+###MybatisPlus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    #    log-impl:  org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.kexun.centmusic.pojo
+
