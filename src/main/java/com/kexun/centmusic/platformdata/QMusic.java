@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -154,8 +155,6 @@ public class QMusic {
     private String getSinger(JSONObject jsonObject) {
         try {
             JSONArray singers = jsonObject.getJSONArray("singer");
-            System.out.println(singers);
-
             StringBuffer sgStr = new StringBuffer();
             for (int i = 0; i < singers.size(); i++) {
                 JSONObject sg = (JSONObject) singers.get(i);
@@ -210,8 +209,13 @@ public class QMusic {
             return redis.get("songmid:" + songmid);
         } else {
             String vkey = getVkey(songmid);
+            if (StringUtils.isEmpty(vkey)) {
+                logger.info("token获取失败");
+                return "";
+            }
             String qplayUrl = "http://ws.stream.qqmusic.qq.com/%s?fromtag=0&guid=126548448&vkey=%s";
             String format = String.format(qplayUrl, "C400" + songmid + ".m4a", vkey);
+            System.out.println(format);
             redis.set("songmid:" + songmid, format);
             redis.expire("songmid:" + songmid, 22, TimeUnit.HOURS);
             return format;
