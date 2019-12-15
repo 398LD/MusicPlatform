@@ -61,30 +61,19 @@ public class QMusic {
 
     //获取随机推荐的
     public String getRandom(int max) {
-        String date = "random:" + DateUtils.getDate(new Date());
-        if (redis.hasKey(date)) {
-            return redis.get(date);
-        } else {
-            String result = HttpUtils.doGet(PlatformURL.ROMDOM);
-            System.out.println(result);
-            JSONObject jsonObject = JSON.parseObject(result);
-            JSONArray songlist = jsonObject.getJSONArray("songlist");
-            HashSet<Music> musics = new HashSet<Music>();
-            while (musics.size() < max) {
-                Random random = new Random();
-                int i = random.nextInt(max);
-                System.out.println(">>>>" + i);
-                JSONObject song = (JSONObject) songlist.get(i);
-                Music music = setModel(song.getJSONObject("data"));
-                if (music == null) continue;
-                musics.add(music);
-            }
-            String s = JSON.toJSONString(musics);
-            redis.set(date, s);
-            //缓存24小时
-            redis.expire(date, 24, TimeUnit.HOURS);
-            return s;
+        String result = HttpUtils.doGet(PlatformURL.ROMDOM);
+        JSONObject jsonObject = JSON.parseObject(result);
+        JSONArray songlist = jsonObject.getJSONArray("songlist");
+        HashSet<Music> musics = new HashSet<Music>();
+        while (musics.size() < max) {
+            Random random = new Random();
+            int i = random.nextInt(songlist.size());
+            JSONObject song = (JSONObject) songlist.get(i);
+            Music music = setModel(song.getJSONObject("data"));
+            if (music == null) continue;
+            musics.add(music);
         }
+        return JSON.toJSONString(musics);
     }
 
     public String getTop100() {
