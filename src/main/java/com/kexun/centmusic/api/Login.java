@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("sso")
 public class Login {
+
+    /*改JWT登录*/
 
     @Autowired
     private UserService userService;
@@ -71,8 +74,8 @@ public class Login {
         //一个月
         cookie.setMaxAge(60 * 60 * 24 * 30);
         response.addCookie(cookie);
-        redis.set("login:" + username, uuid);
-        redis.expire("login:" + username, 30, TimeUnit.DAYS);
+        redis.set("login:" + uuid, username);
+        redis.expire("login:" + uuid, 30, TimeUnit.DAYS);
     }
 
 

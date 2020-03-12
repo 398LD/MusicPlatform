@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: com.kexun.centmusic.CentmusicApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 13.516 s <<< FAILURE! - in com.kexun.centmusic.CentmusicApplicationTests
+test4  Time elapsed: 4.889 s  <<< ERROR!
+java.io.FileNotFoundException: E:\music\后来-刘若英.lrc (系统找不到指定的路径。)
+	at com.kexun.centmusic.CentmusicApplicationTests.saveLrc(CentmusicApplicationTests.java:77)
+	at com.kexun.centmusic.CentmusicApplicationTests.test4(CentmusicApplicationTests.java:70)
+

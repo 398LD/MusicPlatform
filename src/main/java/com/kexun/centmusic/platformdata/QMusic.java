@@ -126,6 +126,7 @@ public class QMusic {
         music.setSongid(songid);
         music.setPhotourl(getPhoto(albumid));
         music.setCreateTime(System.currentTimeMillis());
+
         return music;
     }
 
@@ -204,7 +205,6 @@ public class QMusic {
             }
             String qplayUrl = "http://ws.stream.qqmusic.qq.com/%s?fromtag=0&guid=126548448&vkey=%s";
             String format = String.format(qplayUrl, "C400" + songmid + ".m4a", vkey);
-            System.out.println(format);
             redis.set("songmid:" + songmid, format);
             redis.expire("songmid:" + songmid, 22, TimeUnit.HOURS);
             return format;

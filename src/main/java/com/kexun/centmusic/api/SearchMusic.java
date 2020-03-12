@@ -1,6 +1,7 @@
 package com.kexun.centmusic.api;
 
 import com.kexun.centmusic.common.DateUtils;
+import com.kexun.centmusic.common.RedisUtil;
 import com.kexun.centmusic.platformdata.QMusic;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("search")
@@ -23,6 +29,8 @@ public class SearchMusic {
     @Autowired
     private QMusic qMusic;
     private static Logger logger = Logger.getLogger(SearchMusic.class);
+    @Autowired
+    private RedisUtil redis;
 
     @ResponseBody
     @RequestMapping(value = "music", method = RequestMethod.GET)
@@ -45,14 +53,73 @@ public class SearchMusic {
 
     @ResponseBody
     @RequestMapping("playurl")
-    public String getPlayUrl(String songmid) {
-        return qMusic.getPlayUrl(songmid);
+    public Map<String, Object> getPlayUrl(String songmid, HttpServletRequest request) {
+        String playUrl = qMusic.getPlayUrl(songmid);
+        HashMap<String, Object> map = new HashMap<>();
+        String value = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            //没有登录
+            boolean b = noLoginCheck(request);
+            if (b) {
+                map.put("code", 0);
+                map.put("msg", "success");
+                map.put("playUrl", playUrl);
+            } else {
+                map.put("code", -1);
+                map.put("msg", "未登录每天只能试听10首歌曲哦,赶紧登陆吧...");
+            }
+            return map;
+        }
+        for (Cookie cookie : cookies) {
+            String login = cookie.getName();
+            if ("login".equals(login)) {
+                value = cookie.getValue();
+                break;
+            }
+        }
+        if (value == null) {
+            //没有登录
+            boolean b = noLoginCheck(request);
+            if (b) {
+                map.put("code", 0);
+                map.put("msg", "success");
+                map.put("playUrl", playUrl);
+            } else {
+                map.put("code", -1);
+                map.put("msg", "未登录每天只能试听10首歌曲哦,赶紧登陆吧...");
+            }
+        } else {
+            map.put("code", 0);
+            map.put("msg", "success");
+            map.put("playUrl", playUrl);
+        }
+        return map;
+    }
+
+
+    private boolean noLoginCheck(HttpServletRequest request) {
+        String realIp = getRealIp(request);
+        String s = redis.get("count:" + realIp);
+        if (s == null) {
+            redis.set("count:" + realIp, "1");
+            redis.expire("count:" + realIp, 24, TimeUnit.HOURS);
+            return true;
+        }
+        long count = Long.parseLong(s);
+        if (count >= 10) {
+            return false;
+        } else {
+            count++;
+            redis.set("count:" + realIp, count + "");
+            return true;
+        }
     }
 
 
     @ResponseBody
     @RequestMapping("getlrcArr")
-    public String[] getlrcArr(int songid)  {
+    public String[] getlrcArr(int songid) {
         return qMusic.getlrcArr(songid);
     }
 
